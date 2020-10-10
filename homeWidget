@@ -13,11 +13,8 @@ const API_KEY = "7f9971d8a309102caa0eb85cee4c29bc"
 
 // Latitude and Longitude of the location where you get the weather of.
 // You can get those from the Open Weather website while searching for a city, etc.
-// This values are getted from the widget parameters, the widget parameters is a JSON string that looks like this:
-// { "LAT" : "<latitude>" , "LON" : "<longitude>" , "LOC_NAME" : "<name to display>" }
-// This to allow multiple instances of the widget with different locations, if you will only use one instance (1 widget), you can "hardcode" the values here.
-// Note: To debug the widget you need to place the values here, because when playing the script in-app the widget parameters are null (= crash).
-/*
+
+//live location
 let latLong = {}
 try {
   latLong = await Location.current();
@@ -25,9 +22,10 @@ try {
 
 const LAT = latLong.latitude || widgetParams.LAT
 const LON = latLong.longitude || widgetParams.LON
-*/
-const LAT = 45.3741521
-const LON = 10.8242526
+
+//Latitude and longitude used for debugging
+//const LAT = 45.3741521
+//const LON = 10.8242526
 
 
 // Looking settings
