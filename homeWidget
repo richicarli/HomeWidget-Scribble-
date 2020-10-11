@@ -1,3 +1,4 @@
+
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: yellow; icon-glyph: magic;
@@ -9,12 +10,15 @@
 // WEATHER API PARAMETERS !important
 // API KEY, you need an Open Weather API Key
 // You can get one for free at: https://home.openweathermap.org/api_keys (account needed).
-const API_KEY = "7f9971d8a309102caa0eb85cee4c29bc"
+const API_KEY = ""
 
 // Latitude and Longitude of the location where you get the weather of.
 // You can get those from the Open Weather website while searching for a city, etc.
+// This values are getted from the widget parameters, the widget parameters is a JSON string that looks like this:
+// { "LAT" : "<latitude>" , "LON" : "<longitude>" , "LOC_NAME" : "<name to display>" }
+// This to allow multiple instances of the widget with different locations, if you will only use one instance (1 widget), you can "hardcode" the values here.
+// Note: To debug the widget you need to place the values here, because when playing the script in-app the widget parameters are null (= crash).
 
-//live location
 let latLong = {}
 try {
   latLong = await Location.current();
@@ -23,7 +27,6 @@ try {
 const LAT = latLong.latitude || widgetParams.LAT
 const LON = latLong.longitude || widgetParams.LON
 
-//Latitude and longitude used for debugging
 //const LAT = 45.3741521
 //const LON = 10.8242526
 
@@ -135,11 +138,11 @@ drawContext.drawText(months[today.getMonth()].toString() + " " + ordinalSuffix(t
 //add name of city
 drawContext.setFont(Font.regularSystemFont(30))
 drawContext.setTextColor(Color.white())
-drawContext.drawText(locationData.city.toString(), new Point(25, 155))
+drawContext.drawText(locationData.city + "", new Point(25, 155))
 
 //add image of weather condition
 let image = await loadImage(weatherData.current.weather[0].icon)
-drawContext.drawImageAtPoint(image, new Point(100, 240))
+drawContext.drawImageInRect(image, new Rect(25, 180, 200, 200))
 
 //add degrees
 drawContext.setFont(Font.regularSystemFont(63))
