@@ -101,11 +101,11 @@ try {
 
 // function to add suffix to day's number
 function ordinalSuffix(input) {
-	if (input % 10 == 1 && date != 11) {
+	if (input % 10 == 1 && input != 11) {
 		return input.toString() + "st";
-	} else if (input % 10 == 2 && date != 12) {
+	} else if (input % 10 == 2 && input != 12) {
 		return input.toString() + "nd";
-	} else if (input % 10 == 3 && date != 13) {
+	} else if (input % 10 == 3 && input != 13) {
 		return input.toString() + "rd";
 	} else {
 		return input.toString() + "th";
