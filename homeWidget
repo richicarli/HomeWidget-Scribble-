@@ -1,4 +1,3 @@
-
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: yellow; icon-glyph: magic;
@@ -10,7 +9,7 @@
 // WEATHER API PARAMETERS !important
 // API KEY, you need an Open Weather API Key
 // You can get one for free at: https://home.openweathermap.org/api_keys (account needed).
-const API_KEY = ""
+const API_KEY = "7f9971d8a309102caa0eb85cee4c29bc"
 
 // Latitude and Longitude of the location where you get the weather of.
 // You can get those from the Open Weather website while searching for a city, etc.
@@ -19,14 +18,16 @@ const API_KEY = ""
 // This to allow multiple instances of the widget with different locations, if you will only use one instance (1 widget), you can "hardcode" the values here.
 // Note: To debug the widget you need to place the values here, because when playing the script in-app the widget parameters are null (= crash).
 
+//get location
 let latLong = {}
 try {
   latLong = await Location.current();
 } catch {}
 
-const LAT = latLong.latitude || widgetParams.LAT
-const LON = latLong.longitude || widgetParams.LON
+const LAT = latLong.latitude
+const LON = latLong.longitude
 
+//fake coordinate for debugging
 //const LAT = 45.3741521
 //const LON = 10.8242526
 
@@ -37,10 +38,6 @@ const LON = latLong.longitude || widgetParams.LON
 
 // units : string > Defines the unit used to measure the temps, for temperatures in Fahrenheit use "imperial", "metric" for Celcius and "standard" for Kelvin (Default: "metric").
 const units = "metric"
-// twelveHours : true|false > Defines if the hours are displayed in a 12h format, use false for 24h format. (Default: true)
-const twelveHours = false
-// roundedGraph : true|false > true (Use rounded values to draw the graph) | false (Draws the graph using decimal values, this can be used to draw an smoother line).
-const roundedGraph = true
 // roundedTemp : true|false > true (Displays the temps rounding the values (29.8 = 30 | 29.3 = 29).
 const roundedTemp = true
 
@@ -52,20 +49,19 @@ const roundedTemp = true
 const contextSize = 465
 // mediumWidgetWidth : number > Width of the medium widget in pixels, this depends on you screen size (for an 4 inch display the medium widget is 584 pixels long on the home screen)
 const mediumWidgetWidth = 987
-
-// accentColor : Color > Accent color of some elements (Graph lines and the location label).
-const accentColor = new Color("#EB6E4E", 1)
 // backgroundColor : Color > Background color of the widgets.
-//const backgroundColor = new Color("#1C1C1E", 1)
 const backgroundColor = Color.black();
 
 //From here proceed with caution.
+//create icloud folder for store weather's icons and cache of location
 let fm = FileManager.iCloud();
 let cachePath = fm.joinPath(fm.documentsDirectory(), "weatherCache");
 if(!fm.fileExists(cachePath)){
   fm.createDirectory(cachePath)
 }
-
+// declare variables
+let widget = new ListWidget();
+var today = new Date();
 let weatherData;
 let locationData;
 let usingCachedData = false;
@@ -75,7 +71,9 @@ drawContext.size = new Size((config.widgetFamily == "small") ? contextSize : med
 drawContext.opaque = false
 drawContext.setTextAlignedCenter()
 
+//get weather and location's datas from location of iphone
 try {
+  //delete and recreate folder for not fill all memory
   if(fm.fileExists(cachePath + "/location")){
     fm.remove(cachePath + "/location")
     fm.createDirectory(cachePath + "/location")
@@ -83,6 +81,7 @@ try {
   else{
     fm.createDirectory(cachePath + "/location")
   }
+  //get data from openweather and geocode
   weatherData = await new Request("https://api.openweathermap.org/data/2.5/onecall?lat=" + LAT + "&lon=" + LON + "&exclude=daily,minutely,alerts&units=" + units + "&lang=en&appid=" + API_KEY).loadJSON();
   fm.writeString(fm.joinPath(cachePath + "/location", "lastread"+"_"+LAT+"_"+LON), JSON.stringify(weatherData));
   locationData = await new Request("https://geocode.xyz/" + LAT + "," + LON + "?geoit=json").loadJSON();
@@ -90,6 +89,7 @@ try {
 }catch(e){
   console.log("Offline mode")
   try{
+    //if it is not possibile to catch data, read cache data
     await fm.downloadFileFromiCloud(fm.joinPath(cachePath + "/location", "lastread"+"_"+LAT+"_"+LON));
     let raw = fm.readString(fm.joinPath(cachePath + "/location", "lastread"+"_"+LAT+"_"+LON));
     weatherData = JSON.parse(raw);
@@ -115,10 +115,7 @@ function ordinalSuffix(input) {
 	}
 }
 
-// declare variables
-let widget = new ListWidget();
-var today = new Date();
-
+//set widget
 widget.setPadding(-50, -50, 0, 0)
 widget.backgroundColor = backgroundColor;
 
@@ -128,46 +125,59 @@ drawContext.setFont(Font.regularSystemFont(63))
 drawContext.setTextColor(Color.white())
 drawContext.drawText(days[today.getDay()].toString(), new Point(25,25));
 
-
 //add month and number of the day to widget
 var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 drawContext.setFont(Font.regularSystemFont(63))
 drawContext.setTextColor(Color.white())
 drawContext.drawText(months[today.getMonth()].toString() + " " + ordinalSuffix(today.getDate()), new Point(25, 83));
 
-//add name of city
-drawContext.setFont(Font.regularSystemFont(30))
-drawContext.setTextColor(Color.white())
-drawContext.drawText(locationData.city + "", new Point(25, 155))
+//city name
+try{
+  //add name of city
+  drawContext.setFont(Font.regularSystemFont(30))
+  drawContext.setTextColor(Color.white())
+  drawContext.drawText(locationData.city.toString(), new Point(25, 155))
+}catch(e){
+  //if name of the city isn't yet ready
+  drawContext.setFont(Font.regularSystemFont(30))
+  drawContext.setTextColor(Color.white())
+  drawContext.drawText("Locating...", new Point(25, 155))
+}
 
-//add image of weather condition
-let image = await loadImage(weatherData.current.weather[0].icon)
-drawContext.drawImageInRect(image, new Rect(25, 180, 200, 200))
+//all weather data
+try{
+  //add image of weather condition
+  let image = await loadImage(weatherData.current.weather[0].icon)
+  drawContext.drawImageInRect(image, new Rect(25, 210, 150, 150))
 
-//add degrees
-drawContext.setFont(Font.regularSystemFont(63))
-drawContext.setTextColor(Color.white())
-drawContext.drawText(Math.round(weatherData.current.temp) + "°", new Point(225, 230))
+  //add degrees
+  drawContext.setFont(Font.regularSystemFont(80))
+  drawContext.setTextColor(Color.white())
+  drawContext.drawText(Math.round(weatherData.current.temp) + "°", new Point(225, 235))
 
-//add degrees feels like
-drawContext.setFont(Font.regularSystemFont(30))
-drawContext.setTextColor(Color.gray())
-drawContext.drawText("feels like " + Math.round(weatherData.current.feels_like) + "°", new Point(25, 380))
+  //add degrees feels like
+  drawContext.setFont(Font.regularSystemFont(30))
+  drawContext.setTextColor(Color.gray())
+  drawContext.drawText("feels like " + Math.round(weatherData.current.feels_like) + "°", new Point(25, 380))
+}catch(e){
+  //if weather data isen't yet ready
+  drawContext.setFont(Font.regularSystemFont(63))
+  drawContext.setTextColor(Color.white())
+  drawContext.drawText("Loading...", new Point(25, 270))
+}
 
+//function to download weather's icon from a.animelweb
 async function loadImage(imgName){
   if(fm.fileExists(fm.joinPath(cachePath, imgName))){
     await fm.downloadFileFromiCloud(fm.joinPath(cachePath, imgName))
     return Image.fromData(Data.fromFile(fm.joinPath(cachePath, imgName)))
   }else{
-    let imgdata = await new Request("https://openweathermap.org/img/wn/"+imgName+".png").load();
+    //let imgdata = await new Request("https://openweathermap.org/img/wn/" + imgName + ".png").load();
+    let imgdata = await new Request("http://a.animedlweb.ga/weather/ico/" + imgName + "_ico.png").load();
     let img = Image.fromData(imgdata);
     fm.write(fm.joinPath(cachePath, imgName), imgdata);
 	return img;
   }
-}
-
-function shouldRound(should, value){
-  return ((should) ? Math.round(value) : value)
 }
 
 widget.backgroundImage = (drawContext.getImage());
