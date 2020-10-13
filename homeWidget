@@ -28,8 +28,8 @@ const LAT = latLong.latitude
 const LON = latLong.longitude
 
 //fake coordinate for debugging
-//const LAT = 50
-//const LON = 11
+//const LAT = 45.43
+//const LON = 10.98
 
 
 // Looking settings
