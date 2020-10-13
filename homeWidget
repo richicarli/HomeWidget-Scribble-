@@ -9,7 +9,7 @@
 // WEATHER API PARAMETERS !important
 // API KEY, you need an Open Weather API Key
 // You can get one for free at: https://home.openweathermap.org/api_keys (account needed).
-const API_KEY = "7f9971d8a309102caa0eb85cee4c29bc"
+const API_KEY = ""
 
 // Latitude and Longitude of the location where you get the weather of.
 // You can get those from the Open Weather website while searching for a city, etc.
@@ -28,8 +28,8 @@ const LAT = latLong.latitude
 const LON = latLong.longitude
 
 //fake coordinate for debugging
-//const LAT = 45.3741521
-//const LON = 10.8242526
+//const LAT = 50
+//const LON = 11
 
 
 // Looking settings
