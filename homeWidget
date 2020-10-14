@@ -21,6 +21,7 @@ const API_KEY = ""
 //get location
 let latLong = {}
 try {
+  Location.setAccuracyToHundredMeters();
   latLong = await Location.current();
 } catch {}
 
