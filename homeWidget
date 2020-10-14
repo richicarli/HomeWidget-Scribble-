@@ -85,7 +85,7 @@ try {
   //get data from openweather and geocode
   weatherData = await new Request("https://api.openweathermap.org/data/2.5/onecall?lat=" + LAT + "&lon=" + LON + "&exclude=daily,minutely,alerts&units=" + units + "&lang=en&appid=" + API_KEY).loadJSON();
   fm.writeString(fm.joinPath(cachePath + "/location", "lastread"+"_"+LAT+"_"+LON), JSON.stringify(weatherData));
-  locationData = await new Request("https://geocode.xyz/" + LAT + "," + LON + "?geoit=json").loadJSON();
+  locationData = await await Location.reverseGeocode(LAT, LON)
   fm.writeString(fm.joinPath(cachePath + "/location", "lastLoc"+"_"+LAT+"_"+LON), JSON.stringify(locationData));
 }catch(e){
   console.log("Offline mode")
@@ -135,9 +135,9 @@ drawContext.drawText(months[today.getMonth()].toString() + " " + ordinalSuffix(t
 //city name
 try{
   //add name of city
-  drawContext.setFont(Font.regularSystemFont(30))
+  drawContext.setFont(Font.regularSystemFont(35))
   drawContext.setTextColor(Color.white())
-  drawContext.drawText(locationData.city.toString(), new Point(25, 155))
+  drawContext.drawText(locationData[0].postalAddress.city.toString(), new Point(25, 155))
 }catch(e){
   //if name of the city isn't yet ready
   drawContext.setFont(Font.regularSystemFont(30))
